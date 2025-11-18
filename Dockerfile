@@ -17,7 +17,9 @@ RUN apk add --no-cache \
     postgresql-dev \
     mysql-client \
     nginx \
-    supervisor
+    supervisor \
+    icu-dev \
+    icu-libs
 
 # Instalar extensiones PHP necesarias
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
@@ -32,7 +34,8 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     gd \
     zip \
     soap \
-    xml
+    xml \
+    intl
 
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -79,7 +82,8 @@ RUN mkdir -p \
     storage/framework/views \
     storage/logs \
     storage/certificates \
-    bootstrap/cache && \
+    bootstrap/cache \
+    /var/log/supervisor && \
     chown -R www:www storage bootstrap/cache && \
     chmod -R 775 storage bootstrap/cache && \
     chmod +x /usr/local/bin/entrypoint.sh
