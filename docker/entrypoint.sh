@@ -7,7 +7,24 @@ echo "🚀 Iniciando aplicación de Facturación SUNAT..."
 echo "⏳ Esperando conexión a base de datos..."
 max_tries=30
 count=0
-until php artisan db:show 2>/dev/null || [ $count -eq $max_tries ]; do
+
+# Script PHP simple para verificar conexión a DB sin usar intl
+check_db() {
+    php -r "
+    try {
+        \$pdo = new PDO(
+            'mysql:host=' . getenv('DB_HOST') . ';port=' . getenv('DB_PORT') . ';dbname=' . getenv('DB_DATABASE'),
+            getenv('DB_USERNAME'),
+            getenv('DB_PASSWORD')
+        );
+        exit(0);
+    } catch (Exception \$e) {
+        exit(1);
+    }
+    " 2>/dev/null
+}
+
+until check_db || [ $count -eq $max_tries ]; do
     count=$((count+1))
     echo "Intento $count de $max_tries..."
     sleep 2
@@ -15,6 +32,8 @@ done
 
 if [ $count -eq $max_tries ]; then
     echo "⚠️  Advertencia: No se pudo conectar a la base de datos"
+else
+    echo "✅ Conexión a base de datos exitosa"
 fi
 
 # Crear enlace simbólico de storage si no existe
