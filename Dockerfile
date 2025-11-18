@@ -91,9 +91,6 @@ RUN mkdir -p \
 # Exponer puerto
 EXPOSE 80
 
-# Cambiar a usuario www
-USER www
-
-# Comando de inicio
+# Comando de inicio (ejecutar como root para que supervisord pueda gestionar procesos)
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
