@@ -27,6 +27,25 @@ use App\Http\Controllers\Api\ConsultaCpeControllerMejorado;
 // RUTAS PÚBLICAS (SIN AUTENTICACIÓN)
 // ========================
 
+// Health Check para monitoreo
+Route::get('/health', function () {
+    try {
+        // Verificar conexión a base de datos
+        \DB::connection()->getPdo();
+        $dbStatus = 'ok';
+    } catch (\Exception $e) {
+        $dbStatus = 'error';
+    }
+
+    return response()->json([
+        'status' => 'ok',
+        'app' => config('app.name'),
+        'env' => config('app.env'),
+        'database' => $dbStatus,
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
+
 // Información del sistema
 Route::get('/system/info', [AuthController::class, 'systemInfo']);
 
