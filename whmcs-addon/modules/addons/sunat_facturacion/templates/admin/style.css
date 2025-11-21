@@ -1,0 +1,23 @@
+.sunat-addon-container {
+    padding: 20px 0;
+}
+
+.sunat-addon-container h2 {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e3e3e3;
+}
+
+.sunat-addon-container h2 small {
+    color: #999;
+    font-size: 14px;
+    margin-left: 10px;
+}
+
+.nav-tabs {
+    margin-bottom: 20px;
+}
+
+.panel .panel-heading h3.panel-title {
+    font-weight: 600;
+}
