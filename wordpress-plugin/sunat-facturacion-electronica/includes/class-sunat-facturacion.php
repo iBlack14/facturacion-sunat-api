@@ -83,12 +83,12 @@ class Sunat_Facturacion {
      * @since 1.0.0
      */
     private function define_admin_hooks() {
-        $plugin_admin = new Sunat_Facturacion_Admin();
+        $plugin_admin = new Sunat_Facturacion_Admin('sunat-facturacion', SUNAT_FACTURACION_VERSION);
 
         $this->loader->add_action('admin_menu', $plugin_admin, 'add_admin_menu');
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_styles');
         $this->loader->add_action('admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts');
-        $this->loader->add_action('admin_init', $plugin_admin, 'register_settings');
+        $this->loader->add_filter('plugin_action_links_' . SUNAT_FACTURACION_PLUGIN_BASENAME, $plugin_admin, 'add_action_links');
     }
 
     /**
@@ -97,13 +97,15 @@ class Sunat_Facturacion {
      * @since 1.0.0
      */
     private function define_public_hooks() {
-        $plugin_public = new Sunat_Facturacion_Public();
+        $plugin_public = new Sunat_Facturacion_Public('sunat-facturacion', SUNAT_FACTURACION_VERSION);
 
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_styles');
         $this->loader->add_action('wp_enqueue_scripts', $plugin_public, 'enqueue_scripts');
         $this->loader->add_action('init', $plugin_public, 'register_shortcodes');
-        $this->loader->add_filter('query_vars', $plugin_public, 'add_query_vars');
-        $this->loader->add_action('template_redirect', $plugin_public, 'template_redirect');
+
+        // AJAX handlers
+        $this->loader->add_action('wp_ajax_sunat_download_pdf', $plugin_public, 'ajax_download_pdf');
+        $this->loader->add_action('wp_ajax_sunat_resend_invoice_public', $plugin_public, 'ajax_resend_invoice');
     }
 
     /**
@@ -115,9 +117,23 @@ class Sunat_Facturacion {
         if (class_exists('WooCommerce')) {
             $woo_integration = new Sunat_Facturacion_WooCommerce();
 
+            // Emisión automática al completar pedido
             $this->loader->add_action('woocommerce_order_status_completed', $woo_integration, 'emit_invoice_on_complete', 10, 1);
-            $this->loader->add_action('woocommerce_checkout_fields', $woo_integration, 'add_billing_fields');
-            $this->loader->add_action('woocommerce_admin_order_data_after_billing_address', $woo_integration, 'display_sunat_invoice_info');
+
+            // Campos personalizados en checkout
+            $this->loader->add_filter('woocommerce_checkout_fields', $woo_integration, 'add_billing_fields');
+            $this->loader->add_action('woocommerce_checkout_process', $woo_integration, 'validate_checkout_fields');
+            $this->loader->add_action('woocommerce_checkout_update_order_meta', $woo_integration, 'save_checkout_fields');
+
+            // Display en admin
+            $this->loader->add_action('woocommerce_admin_order_data_after_billing_address', $woo_integration, 'display_admin_order_meta');
+
+            // Metabox en pedidos
+            $this->loader->add_action('add_meta_boxes', $woo_integration, 'add_order_metabox');
+
+            // AJAX handlers
+            $this->loader->add_action('wp_ajax_sunat_emit_invoice_manual', $woo_integration, 'ajax_emit_invoice_manual');
+            $this->loader->add_action('wp_ajax_sunat_resend_invoice', $woo_integration, 'ajax_resend_invoice');
         }
     }
 

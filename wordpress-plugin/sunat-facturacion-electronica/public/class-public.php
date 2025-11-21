@@ -373,6 +373,28 @@ class Sunat_Facturacion_Public {
     }
 
     /**
+     * AJAX: Reenviar comprobante a SUNAT
+     *
+     * @since 1.0.0
+     */
+    public function ajax_resend_invoice() {
+        check_ajax_referer('sunat_public_nonce', 'nonce');
+
+        if (!is_user_logged_in()) {
+            wp_send_json_error(['message' => 'No autorizado']);
+        }
+
+        $invoice_id = intval($_POST['invoice_id']);
+        $result = $this->invoice_generator->resend_to_sunat($invoice_id);
+
+        if ($result['success']) {
+            wp_send_json_success(['message' => 'Comprobante reenviado exitosamente']);
+        } else {
+            wp_send_json_error(['message' => $result['message']]);
+        }
+    }
+
+    /**
      * Registrar estilos del frontend
      *
      * @since 1.0.0
