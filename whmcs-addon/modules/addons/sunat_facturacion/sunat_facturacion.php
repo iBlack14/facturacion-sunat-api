@@ -183,22 +183,23 @@ function sunat_facturacion_output($vars)
     echo '<div class="tab-content">';
 
     // Cargar la vista correspondiente
+    // Usar include (no require_once) para mantener las variables en scope
     switch ($action) {
         case 'companies':
-            require_once __DIR__ . '/templates/admin/companies.php';
+            include __DIR__ . '/templates/admin/companies.php';
             break;
         case 'invoices':
-            require_once __DIR__ . '/templates/admin/invoices.php';
+            include __DIR__ . '/templates/admin/invoices.php';
             break;
         case 'mapping':
-            require_once __DIR__ . '/templates/admin/mapping.php';
+            include __DIR__ . '/templates/admin/mapping.php';
             break;
         case 'logs':
-            require_once __DIR__ . '/templates/admin/logs.php';
+            include __DIR__ . '/templates/admin/logs.php';
             break;
         case 'dashboard':
         default:
-            require_once __DIR__ . '/templates/admin/dashboard.php';
+            include __DIR__ . '/templates/admin/dashboard.php';
             break;
     }
 
